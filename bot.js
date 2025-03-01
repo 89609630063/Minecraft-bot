@@ -13,15 +13,18 @@ bot.onText(/(.+)/, async (msg, match) => {
 
     let foundRecipes = [];
 
-    if (recipes[recipe] && Array.isArray(recipes[recipe].ingredients)) {
-    if (JSON.stringify(recipes[recipe].ingredients.sort()) === JSON.stringify(items.sort())) {
-        foundRecipes.push(recipe);
-    }
-}
+    // Добавляем проверку, чтобы recipe был определён
+    Object.keys(recipes).forEach(recipe => {
+        if (recipes[recipe] && Array.isArray(recipes[recipe].ingredients)) {
+            if (JSON.stringify(recipes[recipe].ingredients.sort()) === JSON.stringify(items.sort())) {
+                foundRecipes.push(recipe);
+            }
+        }
+    });
 
     if (foundRecipes.length > 0) {
         for (let recipe of foundRecipes) {
-            const imagePath = path.join(__dirname, 'images', `${recipe}.png`);
+            const imagePath = `images/${recipe}.png`;
             bot.sendPhoto(chatId, imagePath, { caption: `Из ${items.join(', ')} можно скрафтить: ${recipe}` });
         }
     } else {
