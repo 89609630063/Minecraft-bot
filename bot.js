@@ -13,11 +13,11 @@ bot.onText(/(.+)/, async (msg, match) => {
 
     let foundRecipes = [];
 
-    for (let recipe in recipes) {
-        if (JSON.stringify(recipes[recipe].ingredients.sort()) === JSON.stringify(items.sort())) {
-            foundRecipes.push(recipe);
-        }
+    if (recipes[recipe] && Array.isArray(recipes[recipe].ingredients)) {
+    if (JSON.stringify(recipes[recipe].ingredients.sort()) === JSON.stringify(items.sort())) {
+        foundRecipes.push(recipe);
     }
+}
 
     if (foundRecipes.length > 0) {
         for (let recipe of foundRecipes) {
