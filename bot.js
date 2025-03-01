@@ -14,6 +14,7 @@ try {
     console.error("❌ Ошибка загрузки JSON:", error.message);
 }
 
+// Обрабатываем сообщение от пользователя
 bot.onText(/(.+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     
@@ -44,23 +45,24 @@ bot.onText(/(.+)/, async (msg, match) => {
     });
 
     // Если найдены рецепты, отправляем их пользователю
-const imagePath = `./images/${recipe}.png`;
-
-if (fs.existsSync(imagePath)) {
-    bot.sendPhoto(chatId, imagePath, { caption: `Из ${userItems.join(', ')} можно скрафтить: ${recipe}` });
-} else {
-    console.error(`❌ Ошибка: файл ${imagePath} не найден!`);
-    bot.sendMessage(chatId, `Из ${userItems.join(', ')} можно скрафтить: ${recipe}, но изображение отсутствует.`);
-}
-
-// Если ни один рецепт не найден
-if (foundRecipes.length === 0) {
-    console.log("❌ Не найдено совпадений.");
-    bot.sendMessage(chatId, "Такого рецепта нет или он сложнее.");
-}
+    if (foundRecipes.length > 0) {
+        for (let recipe of foundRecipes) {
+            const imagePath = `./images/${recipe}.png`;
+            if (fs.existsSync(imagePath)) {
+                bot.sendPhoto(chatId, imagePath, { caption: `Из ${userItems.join(', ')} можно скрафтить: ${recipe}` });
+            } else {
+                console.error(`❌ Ошибка: файл ${imagePath} не найден!`);
+                bot.sendMessage(chatId, `Из ${userItems.join(', ')} можно скрафтить: ${recipe}, но изображение отсутствует.`);
+            }
+        }
+    } else {
+        console.log("❌ Не найдено совпадений.");
+        bot.sendMessage(chatId, "Такого рецепта нет или он сложнее.");
+    }
+});
 
 // Запускаем таймер для Railway, чтобы бот не выключался
 console.log("🤖 Бот запущен...");
 setInterval(() => {
     console.log("✅ Бот работает...");
-}, 60000); // Каждую минуту бот пишет в логи, что он жив
+}, 60000); // Каждую минуту бот пишет в логи, чтобы Railway не выключал его
