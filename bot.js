@@ -16,14 +16,28 @@ try {
 
 bot.onText(/(.+)/, async (msg, match) => {
     const chatId = msg.chat.id;
-    const items = match[1].toLowerCase().split(',').map(i => i.trim());
+    
+    // Логируем ввод пользователя
+    console.log("📩 Входные данные от пользователя:", match[1]);
+
+    const userItems = match[1]
+        .toLowerCase()
+        .replace(/\s+/g, '') // Убираем пробелы
+        .split(',')
+        .map(i => i.trim());
+
+    console.log("🔎 Ищем рецепт для:", userItems);
 
     let foundRecipes = [];
 
-    // Добавляем проверку, чтобы recipe был определён
+    // Поиск рецептов
     Object.keys(recipes).forEach(recipe => {
         if (recipes[recipe] && Array.isArray(recipes[recipe].ingredients)) {
-            if (JSON.stringify(recipes[recipe].ingredients.sort()) === JSON.stringify(items.sort())) {
+            const recipeItems = recipes[recipe].ingredients.map(i => i.toLowerCase().replace(/\s+/g, ''));
+
+            console.log(`🆚 Сравниваем с рецептом: ${recipe} → ${recipeItems}`);
+
+            if (JSON.stringify(recipeItems.sort()) === JSON.stringify(userItems.sort())) {
                 foundRecipes.push(recipe);
             }
         }
@@ -32,9 +46,10 @@ bot.onText(/(.+)/, async (msg, match) => {
     if (foundRecipes.length > 0) {
         for (let recipe of foundRecipes) {
             const imagePath = `images/${recipe}.png`;
-            bot.sendPhoto(chatId, imagePath, { caption: `Из ${items.join(', ')} можно скрафтить: ${recipe}` });
+            bot.sendPhoto(chatId, imagePath, { caption: `Из ${userItems.join(', ')} можно скрафтить: ${recipe}` });
         }
     } else {
+        console.log("❌ Не найдено совпадений.");
         bot.sendMessage(chatId, "Такого рецепта нет или он сложнее.");
     }
 });
