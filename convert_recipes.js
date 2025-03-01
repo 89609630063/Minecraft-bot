@@ -1,23 +1,35 @@
 const fs = require('fs');
 
-// Загружаем переведённые ID предметов
-const itemIDs = JSON.parse(fs.readFileSync('item_ids.json', 'utf-8'));
+const recipesPath = 'recipes.json';
+const itemsPath = 'item_ids.json';
+const outputPath = 'recipes_converted.json';
 
-// Загружаем исходный recipes.json (с ID)
-const rawData = JSON.parse(fs.readFileSync('recipes.json', 'utf-8'));
+// Проверяем, существуют ли файлы
+if (!fs.existsSync(recipesPath)) {
+    console.error("❌ Ошибка: Файл recipes.json отсутствует!");
+    process.exit(1);
+}
+
+if (!fs.existsSync(itemsPath)) {
+    console.error("❌ Ошибка: Файл item_ids.json отсутствует!");
+    process.exit(1);
+}
+
+// Загружаем JSON
+const itemIDs = JSON.parse(fs.readFileSync(itemsPath, 'utf-8'));
+const rawRecipes = JSON.parse(fs.readFileSync(recipesPath, 'utf-8'));
 
 const formattedRecipes = {};
 
-for (const itemId in rawData) {
-    const itemData = rawData[itemId][0]; // Берём первый рецепт предмета
-    const resultId = itemData.result.id;
+// Обрабатываем рецепты
+for (const itemId in rawRecipes) {
+    const itemData = rawRecipes[itemId][0];
+    if (!itemData || !itemData.result) continue;
 
-    // Получаем русское название предмета
+    const resultId = itemData.result.id;
     const resultName = itemIDs[resultId] || `id_${resultId}`;
 
     const ingredients = [];
-    
-    // Преобразуем `inShape` (матрицу рецепта) в список ингредиентов
     if (itemData.inShape) {
         itemData.inShape.flat().forEach(id => {
             if (id !== null) {
@@ -26,14 +38,20 @@ for (const itemId in rawData) {
         });
     }
 
-    // Добавляем рецепт в новый JSON
-    formattedRecipes[resultName] = {
-        "ingredients": ingredients,
-        "image": `images/${resultName}.png`
-    };
+    if (ingredients.length > 0) {
+        formattedRecipes[resultName] = {
+            "ingredients": ingredients,
+            "image": `images/${resultName}.png`
+        };
+    }
 }
 
-// Записываем новый JSON (готов для бота)
-fs.writeFileSync('recipes_converted.json', JSON.stringify(formattedRecipes, null, 4), 'utf-8');
+// Проверяем, записались ли данные
+if (Object.keys(formattedRecipes).length === 0) {
+    console.error("❌ Ошибка: recipes_converted.json пуст!");
+    process.exit(1);
+}
 
-console.log("✅ Файл recipes_converted.json успешно создан!");
+// Записываем в файл
+fs.writeFileSync(outputPath, JSON.stringify(formattedRecipes, null, 4), 'utf-8');
+console.log("✅ recipes_converted.json успешно создан!");
