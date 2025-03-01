@@ -1,0 +1,38 @@
+name: Auto Update JSON and Images
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * *' # Запуск каждый день в 00:00 UTC
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Клонируем репозиторий
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: 🛠️ Устанавливаем Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 📦 Устанавливаем зависимости
+        run: npm install axios fs path
+
+      - name: 🔄 Обновляем JSON и загружаем изображения
+        run: |
+          node update_json.js
+          node download_images.js
+
+      - name: 📤 Коммитим изменения
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "GitHub Actions Bot"
+          git add recipes_converted.json images/
+          git commit -m "🔄 Автообновление JSON и изображений" || echo "Нечего коммитить"
+          git push origin main || echo "Нечего пушить"
