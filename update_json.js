@@ -1,7 +1,26 @@
 const fs = require('fs');
 
-console.log("🔄 Обновляем JSON...");
-const jsonData = { updated: new Date().toISOString() }; // Тут можешь добавить обновление данных
+const outputPath = 'recipes_converted.json';
 
-fs.writeFileSync('recipes_converted.json', JSON.stringify(jsonData, null, 2));
-console.log("✅ JSON обновлён!");
+// Пример формата данных (замени на свои данные)
+const formattedRecipes = {
+    updated: new Date().toISOString(),
+    recipes: [
+        { name: "Каменный меч", ingredients: ["палка", "булыжник", "булыжник"] },
+        { name: "Железный меч", ingredients: ["палка", "железный слиток", "железный слиток"] }
+    ]
+};
+
+// Проверка прав доступа перед записью
+fs.access(outputPath, fs.constants.W_OK, (err) => {
+    if (err) {
+        console.error(`❌ Ошибка: Нет прав на запись в ${outputPath}`);
+        process.exit(1); // Прерываем выполнение скрипта
+    } else {
+        console.log(`✅ Доступ на запись в ${outputPath} есть`);
+        
+        // Записываем данные в JSON
+        fs.writeFileSync(outputPath, JSON.stringify(formattedRecipes, null, 4), 'utf-8');
+        console.log("✅ recipes_converted.json успешно создан!");
+    }
+});
