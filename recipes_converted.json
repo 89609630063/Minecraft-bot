@@ -1,1 +1,10 @@
-
+{
+    "Каменный меч": {
+        "ingredients": ["палка", "булыжник", "булыжник"],
+        "image": "images/stone_sword.png"
+    },
+    "Железный меч": {
+        "ingredients": ["палка", "железный слиток", "железный слиток"],
+        "image": "images/iron_sword.png"
+    }
+}
