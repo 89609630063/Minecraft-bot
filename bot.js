@@ -5,8 +5,6 @@ const path = require('path');
 const token = process.env.BOT_TOKEN; // Используем ENV-переменную для Railway
 const bot = new TelegramBot(token, { polling: true });
 
-const fs = require('fs');
-
 let recipes = {};
 try {
     const data = fs.readFileSync('recipes_converted.json', 'utf-8');
