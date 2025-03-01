@@ -1,0 +1,16 @@
+{
+  "name": "minecraft-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for Minecraft crafting recipes",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "generate": "node generate_images.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.60.0",
+    "canvas": "^2.11.0",
+    "fs": "0.0.1-security",
+    "path": "^0.12.7"
+  }
+}
