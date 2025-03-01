@@ -45,9 +45,13 @@ bot.onText(/(.+)/, async (msg, match) => {
 
     if (foundRecipes.length > 0) {
         for (let recipe of foundRecipes) {
-            const imagePath = `images/${recipe}.png`;
-            bot.sendPhoto(chatId, imagePath, { caption: `Из ${userItems.join(', ')} можно скрафтить: ${recipe}` });
-        }
+            const imagePath = `./images/${recipe}.png`;
+if (fs.existsSync(imagePath)) {
+    bot.sendPhoto(chatId, imagePath, { caption: `Из ${userItems.join(', ')} можно скрафтить: ${recipe}` });
+} else {
+    console.error(`❌ Ошибка: файл ${imagePath} не найден!`);
+    bot.sendMessage(chatId, `Из ${userItems.join(', ')} можно скрафтить: ${recipe}, но изображение отсутствует.`);
+}
     } else {
         console.log("❌ Не найдено совпадений.");
         bot.sendMessage(chatId, "Такого рецепта нет или он сложнее.");
