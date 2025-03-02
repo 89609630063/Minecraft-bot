@@ -1,15 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
-const outputDir = path.join(__dirname, "data"); // Локальная папка
-const outputPath = path.join(outputDir, "recipes_converted.json");
+const outputPath = path.join(__dirname, 'data/recipes_converted.json');
 
-// ✅ Проверяем, есть ли папка "data", если нет — создаём её
-if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-}
+// Создаём папку, если её нет
+fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
-// 🔄 Данные для сохранения (замени на свои)
+// Пример данных (замени на свои)
 const formattedRecipes = {
     updated: new Date().toISOString(),
     recipes: [
@@ -18,6 +15,6 @@ const formattedRecipes = {
     ]
 };
 
-// ✅ Записываем JSON в локальную папку
+// Записываем JSON
 fs.writeFileSync(outputPath, JSON.stringify(formattedRecipes, null, 4), 'utf-8');
-console.log(`✅ JSON обновлён и сохранён локально: ${outputPath}`);
+console.log("✅ recipes_converted.json успешно создан!");
