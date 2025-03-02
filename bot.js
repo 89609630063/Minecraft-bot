@@ -5,10 +5,20 @@ const path = require('path');
 const token = process.env.BOT_TOKEN; // Используем ENV-переменную для Railway
 const bot = new TelegramBot(token, { polling: true });
 
-let recipes = {}; // Переменная уже объявлена
+const jsonPath = path.join(__dirname, 'data/recipes_converted.json');
+
+// ✅ Если файла нет, создаём пустой JSON
+if (!fs.existsSync(jsonPath)) {
+    console.log("⚠ Файл recipes_converted.json не найден, создаём новый...");
+    fs.mkdirSync(path.dirname(jsonPath), { recursive: true }); // Создаём папку, если её нет
+    fs.writeFileSync(jsonPath, JSON.stringify({ recipes: [] }, null, 4), 'utf-8');
+}
+
+// ✅ Загружаем JSON
+let recipes = {}; // Создаём переменную один раз
 
 try {
-    recipes = JSON.parse(fs.readFileSync('data/recipes_converted.json', 'utf-8'));
+    recipes = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
     console.log("✅ Recipes загружены!");
 } catch (error) {
     console.error("❌ Ошибка загрузки JSON:", error.message);
