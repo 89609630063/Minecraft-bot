@@ -1,46 +1,67 @@
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
-const token = process.env.BOT_TOKEN; // Railway ENV
+const token = process.env.BOT_TOKEN; 
 const bot = new TelegramBot(token, { polling: true });
 
-const jsonPath = path.join(__dirname, 'recipes_converted.json'); // Используем локальный файл
+const jsonPath = path.join(__dirname, 'recipes_converted.json');
+const imagesPath = path.join(__dirname, 'images');
 
-console.log("📂 JSON путь:", jsonPath);
-
-// ✅ Проверяем, есть ли файл. Если нет, создаём пустой JSON
+// ✅ Загружаем JSON
 if (!fs.existsSync(jsonPath)) {
-    console.log("⚠ Файл recipes_converted.json не найден, создаём новый...");
-    fs.writeFileSync(jsonPath, JSON.stringify({ recipes: [] }, null, 4), 'utf-8');
+    console.log("⚠ Файл recipes_converted.json не найден! Запусти update_json.js.");
+    process.exit(1);
 }
 
-// ✅ Загружаем рецепты
-let recipes = {};
-try {
-    recipes = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
-    console.log("📂 JSON содержимое:", recipes);
-    console.log("✅ Recipes загружены!");
-} catch (error) {
-    console.error("❌ Ошибка загрузки JSON:", error.message);
-}
+let recipes = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+console.log("✅ Recipes загружены!");
 
+// 📩 Обработка сообщений от пользователя
 bot.onText(/(.+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     const userItems = match[1].toLowerCase().replace(/\s+/g, '').split(',').map(i => i.trim());
 
     console.log("📩 Входные данные от пользователя:", userItems);
 
-    let foundRecipes = (recipes.recipes || []).filter(recipe =>
-        JSON.stringify(recipe.ingredients.sort()) === JSON.stringify(userItems.sort())
+    let foundRecipe = Object.keys(recipes).find(key => 
+        JSON.stringify(recipes[key].ingredients.sort()) === JSON.stringify(userItems.sort())
     );
 
-    if (foundRecipes.length > 0) {
-        bot.sendMessage(chatId, `Можно скрафтить: ${foundRecipes.map(r => r.name).join(', ')}`);
+    if (foundRecipe) {
+        const recipe = recipes[foundRecipe];
+        const imagePath = path.join(imagesPath, path.basename(recipe.image));
+
+        if (recipe.image) {
+            if (!fs.existsSync(imagePath)) {
+                console.log(`📷 Изображение ${recipe.image} отсутствует. Скачиваем...`);
+                downloadImage(recipe.image, imagePath, () => {
+                    bot.sendPhoto(chatId, imagePath, { caption: `Можно скрафтить: ${foundRecipe}` });
+                });
+            } else {
+                bot.sendPhoto(chatId, imagePath, { caption: `Можно скрафтить: ${foundRecipe}` });
+            }
+        } else {
+            bot.sendMessage(chatId, `Можно скрафтить: ${foundRecipe}, но изображение отсутствует.`);
+        }
     } else {
         bot.sendMessage(chatId, "❌ Не найдено совпадений.");
     }
 });
+
+// 📷 Функция для скачивания изображений
+function downloadImage(url, dest, callback) {
+    const file = fs.createWriteStream(dest);
+    https.get(url, (res) => {
+        res.pipe(file);
+        file.on('finish', () => {
+            file.close(callback);
+        });
+    }).on("error", (error) => {
+        console.error(`❌ Ошибка загрузки изображения ${url}:`, error.message);
+    });
+}
 
 console.log("🤖 Бот запущен...");
 setInterval(() => console.log("✅ Бот работает..."), 60000);
