@@ -7,18 +7,19 @@ const bot = new TelegramBot(token, { polling: true });
 
 const jsonPath = path.join(__dirname, 'recipes_converted.json'); // Используем локальный файл
 
-console.log("📂 JSON путь:", jsonPath); // Проверяем путь к файлу
+console.log("📂 JSON путь:", jsonPath);
 
 // ✅ Проверяем, есть ли файл. Если нет, создаём пустой JSON
 if (!fs.existsSync(jsonPath)) {
     console.log("⚠ Файл recipes_converted.json не найден, создаём новый...");
-    fs.writeFileSync(jsonPath, JSON.stringify([]), 'utf-8'); // Убираем лишнюю вложенность
+    fs.writeFileSync(jsonPath, JSON.stringify({ recipes: [] }, null, 4), 'utf-8');
 }
 
 // ✅ Загружаем рецепты
-let recipes = [];
+let recipes = {};
 try {
     recipes = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+    console.log("📂 JSON содержимое:", recipes);
     console.log("✅ Recipes загружены!");
 } catch (error) {
     console.error("❌ Ошибка загрузки JSON:", error.message);
@@ -30,7 +31,7 @@ bot.onText(/(.+)/, async (msg, match) => {
 
     console.log("📩 Входные данные от пользователя:", userItems);
 
-    let foundRecipes = recipes.filter(recipe =>
+    let foundRecipes = (recipes.recipes || []).filter(recipe =>
         JSON.stringify(recipe.ingredients.sort()) === JSON.stringify(userItems.sort())
     );
 
