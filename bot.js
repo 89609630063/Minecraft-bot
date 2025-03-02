@@ -5,9 +5,14 @@ const path = require('path');
 const token = process.env.BOT_TOKEN; // Используем ENV-переменную для Railway
 const bot = new TelegramBot(token, { polling: true });
 
-let recipes = {};
-const recipes = JSON.parse(fs.readFileSync('data/recipes_converted.json', 'utf-8'));
+let recipes = {}; // Переменная уже объявлена
 
+try {
+    recipes = JSON.parse(fs.readFileSync('data/recipes_converted.json', 'utf-8'));
+    console.log("✅ Recipes загружены!");
+} catch (error) {
+    console.error("❌ Ошибка загрузки JSON:", error.message);
+}
 // Обрабатываем сообщение от пользователя
 bot.onText(/(.+)/, async (msg, match) => {
     const chatId = msg.chat.id;
