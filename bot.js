@@ -6,13 +6,7 @@ const token = process.env.BOT_TOKEN; // Используем ENV-перемен�
 const bot = new TelegramBot(token, { polling: true });
 
 let recipes = {};
-try {
-    const data = fs.readFileSync('recipes_converted.json', 'utf-8');
-    recipes = JSON.parse(data);
-    console.log("✅ Recipes загружены!");
-} catch (error) {
-    console.error("❌ Ошибка загрузки JSON:", error.message);
-}
+const recipes = JSON.parse(fs.readFileSync('data/recipes_converted.json', 'utf-8'));
 
 // Обрабатываем сообщение от пользователя
 bot.onText(/(.+)/, async (msg, match) => {
