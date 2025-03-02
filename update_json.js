@@ -1,21 +1,20 @@
 const fs = require('fs');
 const path = require('path');
 
-const outputPath = path.join(__dirname, 'recipes_converted.json'); // Файл хранится ЛОКАЛЬНО
+const jsonPath = path.join(__dirname, 'recipes_converted.json');
 
-// ✅ Если папки нет — создаём её
-fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-
-// ✅ Добавляем тестовые рецепты (замени на реальные)
-const formattedRecipes = {
-    updated: new Date().toISOString(),
-    recipes: [
-        { name: "Каменный меч", ingredients: ["палка", "булыжник", "булыжник"] },
-        { name: "Железный меч", ingredients: ["палка", "железный слиток", "железный слиток"] },
-        { name: "Деревянная кирка", ingredients: ["палка", "палка", "доски", "доски", "доски"] }
-    ]
+// 📌 Создаем новый объект с рецептами
+const newRecipes = {
+    "Каменный меч": {
+        "ingredients": ["палка", "булыжник", "булыжник"],
+        "image": "images/stone_sword.png"
+    },
+    "Железный меч": {
+        "ingredients": ["палка", "железный слиток", "железный слиток"],
+        "image": "images/iron_sword.png"
+    }
 };
 
-// ✅ Записываем JSON-файл локально
-fs.writeFileSync(outputPath, JSON.stringify(formattedRecipes, null, 4), 'utf-8');
-console.log("✅ recipes_converted.json УСПЕШНО обновлён!");
+// ✅ Перезаписываем JSON-файл принудительно
+fs.writeFileSync(jsonPath, JSON.stringify(newRecipes, null, 4), 'utf-8');
+console.log("✅ JSON-файл успешно обновлен!");
